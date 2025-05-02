@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Localização em tempo real do ônibus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    let map = L.map('map').setView([-15.7801, -47.9292], 13); // posição inicial (Brasília)
+
+    // Adiciona o mapa base (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+
+    // Função que atualiza a posição no mapa
+    function updateLocation(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      if (marker) {
+        marker.setLatLng([lat, lon]);
+      } else {
+        marker = L.marker([lat, lon]).addTo(map)
+          .bindPopup("Ônibus aqui").openPopup();
+      }
+
+      map.setView([lat, lon], 15);
+    }
+
+    // Erro ao acessar GPS
+    function showError(error) {
+      alert("Erro ao acessar localização: " + error.message);
+    }
+
+    // Inicia rastreamento em tempo real
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(updateLocation, showError, {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 10000
+      });
+    } else {
+      alert("Geolocalização não suportada pelo navegador.");
+    }
+  </script>
+</body>
+</html>
